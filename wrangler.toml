@@ -1,0 +1,21 @@
+name = "galaxy-proxy-vless-trojan"
+main = "worker.js"
+compatibility_date = "2023-10-30"
+workers_dev = true
+
+[vars]
+# =========================================================
+# ⚙️ CONFIGURATION VARIABLES
+# =========================================================
+
+# 1. သင့်ရဲ့ UUID ကို ဒီမှာထည့်ပါ (VLESS ရော Trojan ပါ ဒီ UUID ကိုပဲ သုံးပါမယ်)
+# Generate here: https://www.uuidgenerator.net
+UUID = "d342d11e-d424-4583-b36e-524ab1f0afa4"
+
+# 2. PROXY IP (Optional)
+# တိုက်ရိုက်ချိတ်လို့မရရင် ခုန်ကူးပေးမယ့် ကြားခံ IP ပါ။
+# ဗလာထားခဲ့ရင် Code ထဲက Auto-Proxy-Pool ကနေ အလိုအလျောက် ရွေးချယ်သွားပါမယ်။
+PROXYIP = "cdn.anycast.eu.org"
+
+# 3. DNS Resolver (DoH)
+DNS_RESOLVER_URL = "https://cloudflare-dns.com/dns-query"

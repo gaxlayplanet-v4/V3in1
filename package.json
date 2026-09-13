@@ -1,0 +1,12 @@
+{
+  "name": "galaxy-proxy-vless-trojan",
+  "version": "1.0.0",
+  "description": "VLESS + Trojan Proxy for Cloudflare Workers",
+  "main": "worker.js",
+  "scripts": {
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}
