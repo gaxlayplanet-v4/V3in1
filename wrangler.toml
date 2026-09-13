@@ -1,5 +1,5 @@
 name = "galaxy-proxy-vless-trojan"
-main = "worker.js"
+main = "_worker.js"
 compatibility_date = "2023-10-30"
 workers_dev = true
 
@@ -10,7 +10,7 @@ workers_dev = true
 
 # 1. သင့်ရဲ့ UUID ကို ဒီမှာထည့်ပါ (VLESS ရော Trojan ပါ ဒီ UUID ကိုပဲ သုံးပါမယ်)
 # Generate here: https://www.uuidgenerator.net
-UUID = "d342d11e-d424-4583-b36e-524ab1f0afa4"
+#UUID = ""
 
 # 2. PROXY IP (Optional)
 # တိုက်ရိုက်ချိတ်လို့မရရင် ခုန်ကူးပေးမယ့် ကြားခံ IP ပါ။
