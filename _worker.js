@@ -13,7 +13,7 @@ const CACHE_TTL = 5 * 60 * 1000; // 5 မိနစ် (Millisecond ဖြင့�
 export default {
     async fetch(request, env, ctx) {
         // 1. Configurations
-        const UUID = (env.UUID || "d342d11e-d424-4583-b36e-524ab1f0afa4").toLowerCase().trim();
+        const UUID = (env.UUID || ";
         let WS_PATH = env.WS_PATH || "/speed-tunnel";
         if (!WS_PATH.startsWith('/')) WS_PATH = '/' + WS_PATH;
         
