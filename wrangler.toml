@@ -1,7 +1,10 @@
 name = "galaxy-proxy-vless-trojan"
 main = "_worker.js"
 compatibility_date = "2023-10-30"
+compatibility_flags = [ "nodejs_compat" ]
 workers_dev = true
+keep_vars = true
+
 
 [vars]
 # =========================================================
