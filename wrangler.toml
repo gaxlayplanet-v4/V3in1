@@ -6,7 +6,7 @@ compatibility_flags = [ "nodejs_compat" ]
 [vars]
 # သင့်ရဲ့ UUID ကို ထည့်ပါ (Secret Dashboard ဝင်ဖို့အတွက်ပါ သုံးပါမယ်)
 #UUID = ""
-
+PROXY_URL = "https://galaxytunnel.github.io/PROXYIP.txt"
 # WebSocket ချိတ်ဆက်ရန် လျှို့ဝှက် Path
 WS_PATH = "/speed-tunnel"
 
