@@ -11,4 +11,8 @@ PROXY_URL = "https://galaxytunnel.github.io/PROXYIP.txt"
 WS_PATH = "/speed-tunnel"
 
 # ပိတ်ဆို့ခံရသော Website များအတွက် အရန် Proxy IP
-PROXY_IP = "cdn-b100.xn--b6gac.eu.org"
+PROXYIP = ["104.16.85.20",
+"104.17.123.45",
+"104.21.234.45",
+"172.64.155.1",
+"172.65.250.1"]"
