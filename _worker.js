@@ -5,11 +5,11 @@ import { connect } from "cloudflare:sockets";
 // ============================================
 var userID = "";                    // VLESS: UUID (optional if only TROJAN)
 var trojanPass = "";              // TROJAN: password (optional if only VLESS)
-var proxyIP = ["104.16.85.20,
-104.17.123.45,
-104.21.234.45,
-172.64.155.1,
-172.65.250.1"];
+var proxyIP = ["104.16.85.20",
+"104.17.123.45",
+"104.21.234.45",
+"172.64.155.1",
+"172.65.250.1"];
 var githubProxyURL = "https://galaxytunnel.github.io/PROXYIP.txt";
 
 // DoH Providers (3 URLs with failover)
