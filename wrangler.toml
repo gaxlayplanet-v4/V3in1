@@ -1,24 +1,14 @@
-name = "galaxy-proxy-vless-trojan"
+name = "vless-speed-demon"
 main = "_worker.js"
-compatibility_date = "2023-10-30"
+compatibility_date = "2024-09-13"
 compatibility_flags = [ "nodejs_compat" ]
-workers_dev = true
-keep_vars = true
-
 
 [vars]
-# =========================================================
-# ⚙️ CONFIGURATION VARIABLES
-# =========================================================
-
-# 1. သင့်ရဲ့ UUID ကို ဒီမှာထည့်ပါ (VLESS ရော Trojan ပါ ဒီ UUID ကိုပဲ သုံးပါမယ်)
-# Generate here: https://www.uuidgenerator.net
+# သင့်ရဲ့ UUID ကို ထည့်ပါ (Secret Dashboard ဝင်ဖို့အတွက်ပါ သုံးပါမယ်)
 #UUID = ""
 
-# 2. PROXY IP (Optional)
-# တိုက်ရိုက်ချိတ်လို့မရရင် ခုန်ကူးပေးမယ့် ကြားခံ IP ပါ။
-# ဗလာထားခဲ့ရင် Code ထဲက Auto-Proxy-Pool ကနေ အလိုအလျောက် ရွေးချယ်သွားပါမယ်။
-PROXYIP = "cdn.anycast.eu.org"
+# WebSocket ချိတ်ဆက်ရန် လျှို့ဝှက် Path
+WS_PATH = "/speed-tunnel"
 
-# 3. DNS Resolver (DoH)
-DNS_RESOLVER_URL = "https://cloudflare-dns.com/dns-query"
+# ပိတ်ဆို့ခံရသော Website များအတွက် အရန် Proxy IP
+PROXY_IP = "cdn-b100.xn--b6gac.eu.org"
