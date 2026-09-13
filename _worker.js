@@ -46,36 +46,45 @@ export default {
         const url = new URL(request.url);
         const host = request.headers.get("Host");
 
-        // 1. WebSocket Request -> Start Proxy Tunnel
+        // 1. Strict WebSocket Path Routing (Anti-Probing)
+        const wsPath = (env.WS_PATH || "/galaxy-tunnel").replace(/^\/?/, '/');
+        
         if (upgradeHeader === "websocket") {
-            return await proxyOverWSHandler(request);
+            if (path === wsPath || path === wsPath + "/") {
+                return await proxyOverWSHandler(request);
+            } else {
+                return new Response("Not Found", { status: 404 });
+            }
         }
 
         // 2. HTTP Requests -> Handle Routing
         const path = url.pathname;
 
-        // Subscriptions
-        if (path === "/sub") {
-            return new Response(generateSubscription(userID, host), {
+        // Subscriptions (Hidden behind UUID path to prevent discovery)
+        if (path === `/${userID}/sub`) {
+            return new Response(generateSubscription(userID, host, wsPath), {
                 headers: { "Content-Type": "text/plain; charset=utf-8" }
             });
         }
 
-        if (path === "/clash") {
-            return new Response(generateClashConfig(userID, host), {
+        if (path === `/${userID}/clash`) {
+            return new Response(generateClashConfig(userID, host, wsPath), {
                 headers: { "Content-Type": "text/yaml; charset=utf-8" }
             });
         }
 
-        // Config Page (UI)
-        if (path === `/${userID}` || path === "/config" || path === "/") {
-            return new Response(getGalaxyUI(userID, host, proxyIP), {
+        // Config Page (UI) - Only accessible via /UUID
+        if (path === `/${userID}`) {
+            return new Response(getGalaxyUI(userID, host, proxyIP, wsPath), {
                 headers: { "Content-Type": "text/html; charset=utf-8" }
             });
         }
 
-        // Default 404 / Fake Page
-        return new Response("404 Not Found - Server Running", { status: 404 });
+        // Default Fake Page (Camouflage against Active Probing)
+        return new Response(
+            `<!DOCTYPE html><html><head><title>404 Not Found</title></head><body><center><h1>404 Not Found</h1></center><hr><center>nginx</center></body></html>`, 
+            { status: 404, headers: { "Content-Type": "text/html; charset=utf-8" } }
+        );
     }
 };
 
@@ -355,37 +364,38 @@ async function sha224(str) {
 // ============================================
 // SUBSCRIPTION GENERATORS (/sub)
 // ============================================
-function generateSubscription(userID, hostName) {
+function generateSubscription(userID, hostName, wsPath) {
     let sub = "";
+    const encodedPath = encodeURIComponent(`${wsPath}?ed=2048`);
     
     // NoTLS Ports (80, 8080, etc)
     for (const port of NOTLS_PORTS) {
-        sub += `vless://${userID}@${hostName}:${port}?encryption=none&security=none&type=ws&host=${hostName}&path=%2F%3Fed%3D2048#VLESS-NoTLS-${port}\n`;
-        sub += `trojan://${userID}@${hostName}:${port}?security=none&type=ws&host=${hostName}&path=%2F%3Fed%3D2048#Trojan-NoTLS-${port}\n`;
+        sub += `vless://${userID}@${hostName}:${port}?encryption=none&security=none&type=ws&host=${hostName}&path=${encodedPath}#VLESS-NoTLS-${port}\n`;
+        sub += `trojan://${userID}@${hostName}:${port}?security=none&type=ws&host=${hostName}&path=${encodedPath}#Trojan-NoTLS-${port}\n`;
     }
 
     // TLS Ports (443, 8443, etc)
     for (const port of TLS_PORTS) {
-        sub += `vless://${userID}@${hostName}:${port}?encryption=none&security=tls&sni=${hostName}&fp=randomized&type=ws&host=${hostName}&path=%2F%3Fed%3D2048#VLESS-TLS-${port}\n`;
-        sub += `trojan://${userID}@${hostName}:${port}?security=tls&sni=${hostName}&fp=randomized&type=ws&host=${hostName}&path=%2F%3Fed%3D2048#Trojan-TLS-${port}\n`;
+        sub += `vless://${userID}@${hostName}:${port}?encryption=none&security=tls&sni=${hostName}&fp=randomized&type=ws&host=${hostName}&path=${encodedPath}#VLESS-TLS-${port}\n`;
+        sub += `trojan://${userID}@${hostName}:${port}?security=tls&sni=${hostName}&fp=randomized&type=ws&host=${hostName}&path=${encodedPath}#Trojan-TLS-${port}\n`;
     }
 
     return btoa(sub); // Base64 encoded for v2rayN/Nekobox
 }
 
-function generateClashConfig(userID, hostName) {
+function generateClashConfig(userID, hostName, wsPath) {
     let proxies = "";
     let names = [];
 
     // Clash YAML for NoTLS Ports
     for (const port of NOTLS_PORTS) {
         names.push(`VLESS-NoTLS-${port}`);
-        proxies += `  - {name: "VLESS-NoTLS-${port}", server: ${hostName}, port: ${port}, type: vless, uuid: ${userID}, network: ws, tls: false, udp: false, ws-opts: {path: "/?ed=2048", headers: {Host: ${hostName}}}}\n`;
+        proxies += `  - {name: "VLESS-NoTLS-${port}", server: ${hostName}, port: ${port}, type: vless, uuid: ${userID}, network: ws, tls: false, udp: false, ws-opts: {path: "${wsPath}?ed=2048", headers: {Host: ${hostName}}}}\n`;
     }
     // Clash YAML for TLS Ports
     for (const port of TLS_PORTS) {
         names.push(`VLESS-TLS-${port}`);
-        proxies += `  - {name: "VLESS-TLS-${port}", server: ${hostName}, port: ${port}, type: vless, uuid: ${userID}, network: ws, tls: true, sni: ${hostName}, client-fingerprint: chrome, udp: false, ws-opts: {path: "/?ed=2048", headers: {Host: ${hostName}}}}\n`;
+        proxies += `  - {name: "VLESS-TLS-${port}", server: ${hostName}, port: ${port}, type: vless, uuid: ${userID}, network: ws, tls: true, sni: ${hostName}, client-fingerprint: chrome, udp: false, ws-opts: {path: "${wsPath}?ed=2048", headers: {Host: ${hostName}}}}\n`;
     }
 
     return `proxies:\n${proxies}proxy-groups:\n  - {name: "Auto", type: url-test, proxies: [${names.map(n => `"${n}"`).join(", ")}], url: "http://www.gstatic.com/generate_204", interval: 86400}\n`;
@@ -471,7 +481,7 @@ function safeCloseWebSocket(ws) { try { if (ws.readyState === 1 || ws.readyState
 // ============================================
 // GALAXY UI
 // ============================================
-function getGalaxyUI(userID, hostName, proxyIP) {
+function getGalaxyUI(userID, hostName, proxyIP, wsPath) {
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -509,8 +519,8 @@ function getGalaxyUI(userID, hostName, proxyIP) {
       <div class="status">✅ Worker is Online! ProxyIP: ${proxyIP || "Auto-Pool Active"}</div>
       
       <div class="links">
-        <a href="/sub" class="btn">📋 Copy Subscription (Base64)</a>
-        <a href="/clash" class="btn">⚔️ Download Clash Config</a>
+        <a href="/${userID}/sub" class="btn">📋 Copy Subscription (Base64)</a>
+        <a href="/${userID}/clash" class="btn">⚔️ Download Clash Config</a>
       </div>
     </div>
 
@@ -523,15 +533,15 @@ function getGalaxyUI(userID, hostName, proxyIP) {
         <li>VLESS UUID: <span>${userID}</span></li>
         <li>Trojan Password: <span>${userID}</span></li>
         <li>Network: <span>WebSocket (ws)</span></li>
-        <li>Path: <span>/?ed=2048</span></li>
+        <li>Path: <span>${wsPath}?ed=2048</span></li>
       </ul>
     </div>
 
     <div class="card">
       <h2>🔗 Direct Links (Port 8080 NoTLS)</h2>
-      <pre>vless://${userID}@${hostName}:8080?encryption=none&security=none&type=ws&host=${hostName}&path=%2F%3Fed%3D2048#VLESS-NoTLS-8080</pre>
+      <pre>vless://${userID}@${hostName}:8080?encryption=none&security=none&type=ws&host=${hostName}&path=${encodeURIComponent(wsPath + "?ed=2048")}#VLESS-NoTLS-8080</pre>
       <br>
-      <pre>trojan://${userID}@${hostName}:8080?security=none&type=ws&host=${hostName}&path=%2F%3Fed%3D2048#Trojan-NoTLS-8080</pre>
+      <pre>trojan://${userID}@${hostName}:8080?security=none&type=ws&host=${hostName}&path=${encodeURIComponent(wsPath + "?ed=2048")}#Trojan-NoTLS-8080</pre>
     </div>
   </div>
 </body>
