@@ -12,7 +12,7 @@ import { connect } from "cloudflare:sockets";
 // =========================================================================
 
 // --- Default Configuration (Overridden by wrangler.toml / Env Vars) ---
-let userID = "d342d11e-d424-4583-b36e-524ab1f0afa4";
+let userID = "";
 let proxyIP = ""; // Leave blank to use Auto-Pool
 let dohURL = "https://cloudflare-dns.com/dns-query";
 
